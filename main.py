@@ -7,7 +7,7 @@ import torch
 import visdom
 from torch.optim import lr_scheduler
 from opt import opt
-from loader import AICity_data
+from loader import AICity_data, Veri_data, VRIC_data
 from model.pyramid_resnet import Model
 from loss.loss import Loss
 from utils.get_optimizer import get_optimizer
@@ -49,7 +49,9 @@ class Main(object):
             id_label = id_label.to('cuda')
             color_label = color_label.to('cuda')
             self.optimizer.zero_grad()
+            print(inputs.shape)
             outputs = self.model(inputs)
+            print(outputs.shape)
             loss, tri_loss, id_loss, color_loss, center_loss = self.loss(outputs, id_label, color_label)
             loss.backward()
             self.optimizer.step()
@@ -129,13 +131,13 @@ class Main(object):
 def main():
     model = Model()
 
-    pretrained_dict = torch.load('weights/AI_mgn/VERI.pth')
+    pretrained_dict = torch.load('weights/resnet152-b121ed2d.pth')
     model_dict = model.state_dict()
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
 
-    data = AICity_data.Data()
+    data = VRIC_data.Data()
     loss = Loss()
     main = Main(model, loss, data)
     #main.evaluate_ai()

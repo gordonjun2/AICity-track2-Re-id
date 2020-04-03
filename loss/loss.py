@@ -11,7 +11,10 @@ class Loss(loss._Loss):
     def forward(self, outputs, id_label, color_label):
         cross_entropy_loss = CrossEntropyLoss()
         triplet_loss = TripletLoss(margin=1.2)
-        center_loss = CenterLoss(num_classes=333, feat_dim=512)
+        center_loss = CenterLoss(num_classes=2811, feat_dim=512)
+
+        print(outputs[1].shape)
+        print(id_label.shape)
 
         Triplet_Loss = [triplet_loss(output, id_label) for output in outputs[1:4]]
         Triplet_Loss = sum(Triplet_Loss) / len(Triplet_Loss)
