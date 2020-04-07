@@ -60,11 +60,11 @@ def process(data_path, dtype):
         img.append(data_path + '/' + str(data_list[i][0]))
         car_id.append(data_list[i][1])
         #car_color.append(int(data_list[i][2]) - 1)
-        car_color.append(int(data_list[i][2]))
+        car_color.append(int(data_list[i][2]) - 1)
 
-    print(img[1])
-    print(car_id[1])
-    print(car_color[1])
+    # print(img[1])
+    # print(car_id[1])
+    # print(car_color[1])
 
     return img, car_id, car_color
 
@@ -91,6 +91,7 @@ class VRIC(dataset.Dataset):
         img = self.loader(path)
         if self.transform is not None:
             img = self.transform(img)
+        # print("Target:", target)
         return img, target, color
 
     def __len__(self):

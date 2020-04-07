@@ -21,11 +21,13 @@ class Main(object):
 
     def __init__(self, model, loss, data):
         self.train_loader = data.train_loader
+        self.trainset = data.trainset
         self.test_loader = data.test_loader
         self.query_loader = data.query_loader
         self.testset = data.testset
         self.queryset = data.queryset
 
+        # self.model = model.to('cuda')
         self.model = model.to('cuda')
         self.loss = loss
         self.optimizer = get_optimizer(model)
@@ -45,43 +47,48 @@ class Main(object):
         color3 = 0
         total = 0
         for batch, (inputs, id_label, color_label) in enumerate(self.train_loader):
+            #print("ID LABEL:", id_label)
             inputs = inputs.to('cuda')
             id_label = id_label.to('cuda')
             color_label = color_label.to('cuda')
             self.optimizer.zero_grad()
-            print(inputs.shape)
             outputs = self.model(inputs)
-            print(outputs.shape)
-            loss, tri_loss, id_loss, color_loss, center_loss = self.loss(outputs, id_label, color_label)
+            # loss, tri_loss, id_loss, color_loss, center_loss = self.loss(outputs, id_label, color_label)
+            loss, tri_loss, id_loss, center_loss = self.loss(outputs, id_label, color_label)
+            print("Batch:", batch)
+            print("LOSS:", loss)
             loss.backward()
             self.optimizer.step()
 
             tri += tri_loss.item()
             id += id_loss.item()
-            color += color_loss.item()
+            # color += color_loss.item()
             center += center_loss.item()
 
             total += inputs.size(0)
             _, id1_predicted = torch.max(outputs[4].data, 1)
             _, id2_predicted = torch.max(outputs[5].data, 1)
             _, id3_predicted = torch.max(outputs[6].data, 1)
-            _, color1_predicted = torch.max(outputs[7].data, 1)
-            _, color2_predicted = torch.max(outputs[8].data, 1)
-            _, color3_predicted = torch.max(outputs[9].data, 1)
+            # _, color1_predicted = torch.max(outputs[7].data, 1)
+            # _, color2_predicted = torch.max(outputs[8].data, 1)
+            # _, color3_predicted = torch.max(outputs[9].data, 1)
 
             id1 += (id1_predicted == id_label).sum().item()
             id2 += (id2_predicted == id_label).sum().item()
             id3 += (id3_predicted == id_label).sum().item()
-            color1 += (color1_predicted == color_label).sum().item()
-            color2 += (color2_predicted == color_label).sum().item()
-            color3 += (color3_predicted == color_label).sum().item()
+            # color1 += (color1_predicted == color_label).sum().item()
+            # color2 += (color2_predicted == color_label).sum().item()
+            # color3 += (color3_predicted == color_label).sum().item()
 
         self.scheduler.step()
 
+        # return np.array(tri/len(self.train_loader)), np.array(id/len(self.train_loader)), \
+        #        np.array(color/len(self.train_loader)), np.array(center/len(self.train_loader)), np.array(id1/total), \
+        #        np.array(id2/total), np.array(id3/total), np.array(color1/total), np.array(color2/total), \
+        #        np.array(color3/total),
         return np.array(tri/len(self.train_loader)), np.array(id/len(self.train_loader)), \
-               np.array(color/len(self.train_loader)), np.array(center/len(self.train_loader)), np.array(id1/total), \
-               np.array(id2/total), np.array(id3/total), np.array(color1/total), np.array(color2/total), \
-               np.array(color3/total),
+               np.array(center/len(self.train_loader)), np.array(id1/total), \
+               np.array(id2/total), np.array(id3/total)
 
     def evaluate(self):
 
@@ -131,6 +138,7 @@ class Main(object):
 def main():
     model = Model()
 
+    #pretrained_dict = torch.load('weights/resnet152-b121ed2d.pth', map_location=lambda storage, loc: storage)
     pretrained_dict = torch.load('weights/resnet152-b121ed2d.pth')
     model_dict = model.state_dict()
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -163,7 +171,7 @@ def main():
                     'title': 'accuracy curve',
                 }
             )
-            if epoch % 10 == 0:
+            if epoch % 1 == 0:
                 print('\nstart evaluate')
                 os.makedirs('weights/AI_mgn', exist_ok=True)
                 torch.save(model.state_dict(), ('weights/AI_mgn/modelv5_{}.pth'.format(epoch)))

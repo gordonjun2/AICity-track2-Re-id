@@ -13,8 +13,8 @@ class Loss(loss._Loss):
         triplet_loss = TripletLoss(margin=1.2)
         center_loss = CenterLoss(num_classes=2811, feat_dim=512)
 
-        print(outputs[1].shape)
-        print(id_label.shape)
+        # print(outputs[1].shape)
+        # print(id_label.shape)
 
         Triplet_Loss = [triplet_loss(output, id_label) for output in outputs[1:4]]
         Triplet_Loss = sum(Triplet_Loss) / len(Triplet_Loss)
@@ -25,9 +25,11 @@ class Loss(loss._Loss):
         CrossEntropy_Loss_id = [cross_entropy_loss(output, id_label) for output in outputs[4:7]]
         CrossEntropy_Loss_id = sum(CrossEntropy_Loss_id) / len(CrossEntropy_Loss_id)
 
-        CrossEntropy_Loss_color = [cross_entropy_loss(output, color_label) for output in outputs[7:]]
-        CrossEntropy_Loss_color = sum(CrossEntropy_Loss_color) / len(CrossEntropy_Loss_color)
+        # CrossEntropy_Loss_color = [cross_entropy_loss(output, color_label) for output in outputs[7:]]
+        # CrossEntropy_Loss_color = sum(CrossEntropy_Loss_color) / len(CrossEntropy_Loss_color)
 
-        loss_sum = Triplet_Loss + 2 * (CrossEntropy_Loss_id + CrossEntropy_Loss_color) + Centor_Loss
+        # loss_sum = Triplet_Loss + 2 * (CrossEntropy_Loss_id + CrossEntropy_Loss_color) + Centor_Loss
+        loss_sum = Triplet_Loss + 2 * (CrossEntropy_Loss_id) + Centor_Loss
 
-        return loss_sum, Triplet_Loss, CrossEntropy_Loss_id, CrossEntropy_Loss_color, Centor_Loss
+        # return loss_sum, Triplet_Loss, CrossEntropy_Loss_id, CrossEntropy_Loss_color, Centor_Loss
+        return loss_sum, Triplet_Loss, CrossEntropy_Loss_id, Centor_Loss
